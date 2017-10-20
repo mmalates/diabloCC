@@ -62,6 +62,7 @@ def landing():
 
 @application.route('/model/', methods=['POST'])
 def model():
+    # get some weather features
     url240 = 'https://api.weather.com/v1/geocode/37.82616/-121.980217/forecast/hourly/240hour.json?apiKey=6532d6454b8aa370768e63d6ba5a832e&units=e'
 
     response240 = requests.get(url240)
@@ -79,15 +80,13 @@ def model():
     df240['fcst_valid_local'] = pd.to_datetime(df240['fcst_valid_local'])
     df240['date'] = df240.fcst_valid_local.dt.date
     averaged = df240.groupby(by='date').mean()
-    averaged.head()
-    averaged.columns
     df240 = averaged[['vis', 'dewpt', 'mslp']]
     df240['date'] = df240.index
     df240['date'] = pd.to_datetime(df240['date'])
     df240['date'] = df240.date.dt.strftime('%m-%d %a')
-    print df240
-    url = 'https://api.weather.com/v1/geocode/37.821373/-121.968079/forecast/daily/10day.json?apiKey=6532d6454b8aa370768e63d6ba5a832e&units=e'
 
+    # more weather features
+    url = 'https://api.weather.com/v1/geocode/37.821373/-121.968079/forecast/daily/10day.json?apiKey=6532d6454b8aa370768e63d6ba5a832e&units=e'
     response = requests.get(url)
     jsoned = response.json()
     tenday = []
@@ -108,35 +107,70 @@ def model():
                             temp_high = valday
                         if keyday == 'rh':
                             humid = valday
-            # dow = pd.to_datetime(date,'%Y-%m-%d')
             tenday.append([date, temp_high, temp_low, humid, wind, prec])
 
+    # create dataframe for weather data
     data = pd.DataFrame(tenday, columns=[
                         'date', 'temp_high', 'temp_low', 'hum_avg', 'wind_avg', 'prec'])
 
+    # fix first weather df for merge
     data['date'] = pd.to_datetime(data['date'])
     data['DOW'] = data.date.dt.dayofweek
     data['DOY'] = data.date.dt.dayofyear
     data['date'] = data.date.dt.strftime('%m-%d %a')
-    data = data.merge(df240, how='left', on='date')
-    data['vis_avg'] = data['vis']
-    data['dew_avg'] = data['dewpt']
-    data['sea_avg'] = data['mslp']
 
+    # merge the weather data
+    data = data.merge(df240, how='left', on='date')
+
+    # feature engineering
+    data['vis_avg'] = data['vis'].round(1)
+    data['dew_avg'] = data['dewpt'].round(1)
+    data['sea_avg'] = data['mslp'].round(1)
+    data['temp_high_sqrt'] = np.sqrt(data.temp_high.values)
+    data['hum_avg_sqrt'] = np.sqrt(data['hum_avg'])
+    data['prec_sqrt'] = np.sqrt(data['prec'])
+    data['year'] = data.date.dt.year
+    data['month'] = data.date.dt.month
+
+    # create rain boolean
+    data['rain'] = data.prec.values > 0
+
+    # create cumulative rain feature
+    prec_arr = data.prec.values
+    prec_arr = ([0.0] + list(prec_arr))[:-1]
+    data['cum_prec'] = np.array(prec_arr) + data.prec.values
+
+    # create rain the day before boolean
+    rain_arr = data.rain.values
+    rain_dbf = ([False] + list(rain_arr))[:-1]
+    data['rain_db4'] = np.array(rain_dbf)
+
+    # remove mondays
+    not_mondays = data.DOW != 0
+    data = data[not_mondays]
+
+    # load training data
     def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
     df = pd.read_csv('data/train_clean.csv',
                      parse_dates=['date'], date_parser=dateparse)
 
-    features = ['DOW', 'DOY', 'temp_high', 'temp_low',
-                'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg']
+    # define features for model
+    features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
+                'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']
 
+    # feature matrix
     X = df[features]
+
+    # target variable
     y = df['rounds']
+
+    # create predictions columns
     data['prediction'] = RF_model(X, y, data).astype(int)
     return render_template('model.html', title='Ten Day Forecast', tenday_fc=data.values, user=user_info, forecast_data={}, user_photo=user_photo_url, prediction=data.prediction.values)
 
 
 def RF_model(X, y, forecast):
+    ''' fit and predict with a random forest model '''
     rf = RandomForestRegressor(n_estimators=50, bootstrap=False,
                                max_depth=8, max_features='log2', random_state=123, n_jobs=4)
     rf.fit(X, y)
