@@ -94,5 +94,4 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * Staff members will interact with database on S3 that can be updated and modified via the web application.  The database will be used to improve on the model over time.
   * Weather forecast data with be requested in real time using the `pywapi` package and combined with a model that is updated on a semi-frequent schedule.
 
-### 3. Account Sign-In
-  * Google services API has been implemented and tested.
+A test version of the application currently exists at http://test-eb-dev.us-east-2.elasticbeanstalk.com/
