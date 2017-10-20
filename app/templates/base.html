@@ -1,0 +1,89 @@
+<html>
+
+  <head>
+    <style>
+    .navbar {
+      margin: 0px;
+      overflow: hidden;
+      color: #white;
+      font-size: 110%;
+      background-color: #666633;
+    }
+
+    .navbar a {
+      font-family: "Sans Serif";
+      color: white;
+      padding: 15px 10px;
+      float: left;
+      text-decoration: none;
+    }
+    .navbar a:hover {
+      color: blue;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        padding: 12px 16px;
+        z-index: 1;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    </style>
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>Diablo Country Club Play Predictor</title>
+    {% endif %}
+
+  </head>
+  <body>
+    <div class="navbar">
+        {% if user %}
+        <a href="/landing">Home</a>
+        <!-- <a href="/logout">Logout</a> -->
+        <img src={{user_photo}} style="padding:10px 10px;float:right" width=30px height=30px>
+        <a href="/profile" style="padding:15px 10px;float:right;font-size=80%" class="right">{{ user }}</a>
+        {% else %}
+        <a href="/landing">Home</a>
+        <img src={{user_photo}} style="padding:10px 10px;float:right" width=30px height=30px>
+        <a href="/login" style="padding:15px 10px;float:right;font-size=80%" class="right">Login</a>
+        {% endif %}
+    </div>
+    <h1>Diablo Country Club <img src='../img/web_logo_2015.png' style="float:right" width=100px height=100px /></img></h1>
+    {% if user %}
+    <div>
+      <form action="/model/" method="post">
+        <button name="model" type="submit">Get Prediction</button>
+      </form>
+    </div>
+    <!-- <div>
+      <form action="/forecast/" method="post">
+        <button name="forecast" type="submit">Get Forecast</button>
+      </form>
+    </div> -->
+    <hr>
+    {% endif %}
+  <!-- <hr>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }} </li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %} -->
+    {% block content %}{% endblock %}
+  </body>
+</html>
