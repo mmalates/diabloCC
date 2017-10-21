@@ -12,11 +12,11 @@
 <hr> -->
 <div>
   <div>
-     <table style="width:60%;background-color:#f1f1c1;text-align:left;padding:15px;border: 1px solid black;">
+     <table style="width:90%;background-color:#f1f1c1;text-align:left;padding:15px;border: 1px solid black;">
         <tr>
           <th>Date</th>
           <th>Temp High (F)</th>
-          <th>Temp Low</th>
+          <th>Temp Low (F)</th>
           <th>Humidity (%)</th>
           <th>Wind Speed (mph)</th>
           <th>Precipitation (in)</th>
@@ -24,9 +24,10 @@
           <th>Dewpoint (F)</th>
           <th>Pressure (in hg)</th>
           <th>Predicted Rounds</th>
-       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, vis_avg, dew_avg, sea_avg, pred in tenday_fc %}
+
+       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, date_for_table, vis_avg, dew_avg, sea_avg, temp_high_sqrt, hum_avg_sqrt, prec_sqrt, year, month, rain, cum_prec, rain_db4, pred in tenday_fc %}
         <tr>
-          <td style="text-align: justify">{{date}}</td>
+          <td style="text-align: justify">{{date_for_table}}</td>
           <td style="text-align: center">{{temp_high}}</td>
           <td style="text-align: center">{{temp_low}}</td>
           <td style="text-align: center">{{humid}}</td>

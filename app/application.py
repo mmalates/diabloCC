@@ -4,6 +4,7 @@ from flask_oauth import OAuth
 import requests
 import json
 import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 
 
@@ -27,7 +28,7 @@ from sklearn.ensemble import RandomForestRegressor
 # EB looks for an 'application' callable by default.
 application = Flask(__name__)
 
-user_info = "test"
+user_info = "staff"
 user_photo_url = 'https://demo.keypasco.com/res-1.2.2/img/User_ring.png'
 
 
@@ -77,14 +78,14 @@ def model():
             list.append(value)
         matrix.append(list)
     df240 = pd.DataFrame(matrix, columns=keys)
-    df240['fcst_valid_local'] = pd.to_datetime(df240['fcst_valid_local'])
-    df240['date'] = df240.fcst_valid_local.dt.date
+    df240['fcst_valid_local'] = pd.to_datetime(
+        df240['fcst_valid_local'])
+    df240['date'] = df240['fcst_valid_local'].dt.date
     averaged = df240.groupby(by='date').mean()
-    df240 = averaged[['vis', 'dewpt', 'mslp']]
-    df240['date'] = df240.index
-    df240['date'] = pd.to_datetime(df240['date'])
-    df240['date'] = df240.date.dt.strftime('%m-%d %a')
 
+    df_fcst = averaged[['vis', 'dewpt', 'mslp']]
+    df_fcst['date'] = pd.to_datetime(df_fcst.index)
+    df_fcst['date_for_table'] = df_fcst['date'].dt.strftime('%m-%d %a')
     # more weather features
     url = 'https://api.weather.com/v1/geocode/37.821373/-121.968079/forecast/daily/10day.json?apiKey=6532d6454b8aa370768e63d6ba5a832e&units=e'
     response = requests.get(url)
@@ -117,10 +118,9 @@ def model():
     data['date'] = pd.to_datetime(data['date'])
     data['DOW'] = data.date.dt.dayofweek
     data['DOY'] = data.date.dt.dayofyear
-    data['date'] = data.date.dt.strftime('%m-%d %a')
 
     # merge the weather data
-    data = data.merge(df240, how='left', on='date')
+    data = data.merge(df_fcst, how='left', on='date')
 
     # feature engineering
     data['vis_avg'] = data['vis'].round(1)
@@ -129,30 +129,63 @@ def model():
     data['temp_high_sqrt'] = np.sqrt(data.temp_high.values)
     data['hum_avg_sqrt'] = np.sqrt(data['hum_avg'])
     data['prec_sqrt'] = np.sqrt(data['prec'])
+    # data['date'] = pd.to_datetime(data['date'])
     data['year'] = data.date.dt.year
     data['month'] = data.date.dt.month
+    data['date_for_table'] = data.date.dt.strftime('%m-%d %a')
 
     # create rain boolean
     data['rain'] = data.prec.values > 0
 
     # create cumulative rain feature
     prec_arr = data.prec.values
-    prec_arr = ([0.0] + list(prec_arr))[:-1]
+    prec_arr = np.insert(prec_arr, 0, 0.)[:-1]
     data['cum_prec'] = np.array(prec_arr) + data.prec.values
 
     # create rain the day before boolean
     rain_arr = data.rain.values
-    rain_dbf = ([False] + list(rain_arr))[:-1]
+    rain_dbf = np.insert(rain_arr, 0, False)[:-1]
     data['rain_db4'] = np.array(rain_dbf)
 
     # remove mondays
     not_mondays = data.DOW != 0
     data = data[not_mondays]
-
     # load training data
+    features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
+                'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']
+
     def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
     df = pd.read_csv('data/train_clean.csv',
                      parse_dates=['date'], date_parser=dateparse)
+
+    # feature engineering
+    df = df.sort_values('date')
+    df['year'] = df.date.dt.year
+    df['month'] = df.date.dt.month
+
+    # create rain boolean
+    df['rain'] = df.prec.values > 0
+
+    # create cumulative rain feature
+    prec_arr = df.prec.values
+    prec_arr = np.insert(prec_arr, 0, 0.)[:-1]
+    df['cum_prec'] = np.array(prec_arr) + df.prec.values
+
+    # create rain the day before boolean
+    rain_arr = df.rain.values
+    rain_dbf = np.insert(rain_arr, 0, False)[:-1]
+    df['rain_db4'] = np.array(rain_dbf)
+
+    # remove outliers
+    df = df[df.rounds < 200]
+
+    # remove mondays because they are all holidays
+    not_mondays = df.DOW != 0
+    df = df[not_mondays]
+
+    df['temp_high_sqrt'] = np.sqrt(df['temp_high'])
+    df['hum_avg_sqrt'] = np.sqrt(df['hum_avg'])
+    df['prec_sqrt'] = np.sqrt(df['prec'])
 
     # define features for model
     features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
@@ -160,21 +193,22 @@ def model():
 
     # feature matrix
     X = df[features]
-
     # target variable
     y = df['rounds']
 
     # create predictions columns
     data['prediction'] = RF_model(X, y, data).astype(int)
+
     return render_template('model.html', title='Ten Day Forecast', tenday_fc=data.values, user=user_info, forecast_data={}, user_photo=user_photo_url, prediction=data.prediction.values)
 
 
 def RF_model(X, y, forecast):
     ''' fit and predict with a random forest model '''
     rf = RandomForestRegressor(n_estimators=50, bootstrap=False,
-                               max_depth=8, max_features='log2', random_state=123, n_jobs=4)
+                               max_depth=8, max_features=0.6, n_jobs=4)
     rf.fit(X, y)
-    return rf.predict(forecast[['DOW', 'DOY', 'temp_high', 'temp_low', 'hum_avg', 'wind_avg', 'prec', 'sea_avg', 'dew_avg', 'vis_avg']])
+    return rf.predict(forecast[['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low', 'hum_avg', 'wind_avg', 'prec', 'sea_avg', 'dew_avg', 'vis_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']])
+    # return rf.predict(forecast)
 
 #
 # GOOGLE_CLIENT_ID = '619170425013-r2ge51f3mv49ml5o0grla2qqcp1fq6da.apps.googleusercontent.com'
