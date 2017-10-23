@@ -78,8 +78,19 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
   * Using the features listed above, a non-bootstrapped random forest model with 150 trees and max depth of 6 achieved an rmse of 29.8 rounds.
 
+### 4. ARIMA
+  * Fit an ARIMA model with (p,d,q) = (1,1,0) of difference stationarized history from the previous year.
+
+  * Stationarized data was also corrected for seasonal effects by subtracting the rolling average.
+
+  * The model uses the previous year for forecasting, differenced on the data 2 years prior.
+
+  * Using the previous 4 years for validation, the performs with an RMSE of 535 rounds.
+
+  * Forecasting to next year (2017-09 through 2018-08) the model predicts 22,221 rounds will be played.
+
 ### Future Models
-  * ARIMA/ARIMAX
+  * ARIMAX
 
 ---
 

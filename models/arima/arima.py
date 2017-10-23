@@ -64,7 +64,7 @@ def inverse_difference(history, yhat, interval=1):
 
 
 def subtract_rolling_mean(series):
-    moving_avg = pd.rolling_mean(series, 12, center=True)
+    moving_avg = series.rolling(window=12, center=True).mean()
     series - moving_avg
     series.dropna(inplace=True)
     return series
@@ -78,6 +78,38 @@ if __name__ == '__main__':
     series = subtract_rolling_mean(series)
     X = series.values
     X = X.astype('float32')
+    # validation
+    errors = []
+    for back_to_the_future in range(-6, -2):
+        months_in_year = 12
+        history = [x for x in series[months_in_year * back_to_the_future -
+                                     12:len(series) - months_in_year * back_to_the_future + 12]]
+        predictions = list()
+        forecast_months = 12
+        test = series[months_in_year * back_to_the_future +
+                      12: months_in_year * back_to_the_future + 24]
+        for i in range(12):
+            diff = difference(history, months_in_year)
+            # predict
+            model = ARIMA(diff, order=(0, 1, 1))
+            model_fit = model.fit(trend='nc', disp=0)
+            yhat = model_fit.forecast()[0]
+            yhat = inverse_difference(history, yhat, months_in_year)
+            predictions.append(yhat)
+            # observation
+            obs = test[i]
+            history.append(obs)
+            print('>Predicted=%.3f, Expected=%3.f' % (yhat, obs))
+        # report performance
+        mse = mean_squared_error(test, predictions)
+        rmse = np.sqrt(mse)
+        total = sum(predictions)
+        print('total rounds: {}').format(total[0])
+        print('actual rounds: {}').format(sum(test))
+        print('RMSE: %.3f' % rmse)
+        errors.append(rmse)
+    print "CV RMSE: {}".format(np.mean(errors))
+    # forecast
     history = [x for x in series[-24:]]
     predictions = list()
     forecast_months = 12
@@ -96,4 +128,4 @@ if __name__ == '__main__':
         history.append(obs)
         print('>Predicted=%.3f' % yhat)
     total = sum(predictions)
-    print('total rounds: {}').format(total[0])
+    print('forecasted rounds: {}').format(total[0])
