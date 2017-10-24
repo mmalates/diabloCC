@@ -85,7 +85,7 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
   * The model uses the previous year for forecasting, differenced on the data 2 years prior.
 
-  * Using the previous 4 years for validation, the performs with an RMSE of 535 rounds.
+  * Using the previous 4 years for validation, the performs with a mean RMSE of 535 rounds.
 
   * Forecasting to next year (2017-09 through 2018-08) the model predicts 22,221 rounds will be played.
 

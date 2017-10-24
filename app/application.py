@@ -6,26 +6,9 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
+from collections import defaultdict
 
 
-# print a nice greeting.
-
-
-# def say_hello(username="World"):
-#     return '<p>Hello %s!</p>\n' % username
-#
-#
-# # some bits of text for the page.
-# header_text = '''
-#     <html>\n<head> <title>EB Flask Test</title> </head>\n<body>'''
-# instructions = '''
-#     <p><em>Hint</em>: This is a RESTful web service! Append a username
-#     to the URL (for example: <code>/Thelonious</code>) to say hello to
-#     someone specific.</p>\n'''
-# home_link = '<p><a href="/">Back</a></p>\n'
-# footer_text = '</body>\n</html>'
-
-# EB looks for an 'application' callable by default.
 application = Flask(__name__)
 
 user_info = "staff"
@@ -50,16 +33,6 @@ def landing():
                                user_photo='https://demo.keypasco.com/res-1.2.2/img/User_ring.png',
                                forecast_data={})
 
-# add a rule for the index page.
-# application.add_url_rule('/', 'index', (lambda: header_text +
-#                                         say_hello() + instructions + footer_text))
-
-
-# add a rule when the page is accessed with a name appended to the site
-# URL.
-# application.add_url_rule('/<username>', 'hello', (lambda username:
-#                                                   header_text + say_hello(username) + home_link + footer_text))
-#
 
 @application.route('/model/', methods=['POST'])
 def model():
@@ -196,9 +169,37 @@ def model():
     # target variable
     y = df['rounds']
 
-    # create predictions columns
+    # get cluster similarities
+    cluster_features = ['temp_high', 'temp_low', 'hum_avg',
+                        'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg']
+    clusterdf = pd.read_csv('data/5ward.csv', parse_dates=[
+        'date'], date_parser=dateparse)
+
+    meanvect = clusterdf.groupby(by='label').mean()
+    vectors = meanvect[cluster_features].values
+    index = meanvect[cluster_features].index
+
+    dic = defaultdict()
+    for label, values in zip(index, vectors):
+        dic[label] = values
+
+    labels = []
+    for day in data[cluster_features].values:
+        diffs = defaultdict(float)
+        for label, vector in dic.iteritems():
+            diffs[label] = np.sum(np.abs(day - vector))
+        labels.append(min(diffs.items(), key=lambda x: x[1]))
+    label_col = []
+    index_dic = {5.0: 5.0, 4.0: 2.0, 3.0: 1.0, 2.0: 4.0, 1.0: 3.0}
+    for cluster_label in labels:
+        label_col.append(index_dic[cluster_label[0]])
+    data['labels'] = np.array(label_col)
     data['prediction'] = RF_model(X, y, data).astype(int)
 
+    data['golf_index'] = (14.) * (1.0 / np.sqrt(data['prediction'])
+                                  ) * data['labels']
+    data['golf_index'] = data['golf_index'].round(2)
+    # create predictions columns
     return render_template('model.html', title='Ten Day Forecast', tenday_fc=data.values, user=user_info, forecast_data={}, user_photo=user_photo_url, prediction=data.prediction.values)
 
 
@@ -208,107 +209,7 @@ def RF_model(X, y, forecast):
                                max_depth=8, max_features=0.6, n_jobs=4)
     rf.fit(X, y)
     return rf.predict(forecast[['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low', 'hum_avg', 'wind_avg', 'prec', 'sea_avg', 'dew_avg', 'vis_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']])
-    # return rf.predict(forecast)
 
-#
-# GOOGLE_CLIENT_ID = '619170425013-r2ge51f3mv49ml5o0grla2qqcp1fq6da.apps.googleusercontent.com'
-#
-# GOOGLE_CLIENT_SECRET = 'oGMtg3by2h_EqOWTPPbVe1jY'
-# # one of the Redirect URIs from Google APIs console
-# REDIRECT_URI = '/oauth2callback'
-#
-# SECRET_KEY = 'development key'
-# DEBUG = True
-#
-# app.debug = DEBUG
-# app.secret_key = SECRET_KEY
-# oauth = OAuth()
-#
-# google = oauth.remote_app('google',
-#                           base_url='https://www.google.com/accounts/',
-#                           authorize_url='https://accounts.google.com/o/oauth2/auth',
-#                           request_token_url=None,
-#                           request_token_params={
-#                               'scope': 'https://www.googleapis.com/auth/userinfo.email', 'response_type': 'code'},
-#                           access_token_url='https://accounts.google.com/o/oauth2/token',
-#                           access_token_method='POST',
-#                           access_token_params={
-#                               'grant_type': 'authorization_code'},
-#                           consumer_key=GOOGLE_CLIENT_ID,
-#                           consumer_secret=GOOGLE_CLIENT_SECRET)
-#
-#
-# @application.route('/index')
-# def index():
-#     access_token = session.get('access_token')
-#     if access_token is None:
-#         return redirect(url_for('login'))
-#
-#     access_token = access_token[0]
-#     from urllib2 import Request, urlopen, URLError
-#
-#     headers = {'Authorization': 'OAuth ' + access_token}
-#     req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
-#                   None, headers)
-#     try:
-#         res = urlopen(req)
-#     except URLError, e:
-#         if e.code == 401:
-#             # Unauthorized - bad token
-#             session.pop('access_token', None)
-#             return redirect(url_for('login'))
-#         return res.read()
-#
-#     global user_info, user_photo_url
-#     match = re.search(r'(http.*.jpg)', res.read())
-#     user_photo_url = match.group(0)
-#
-#     try:
-#         res = urlopen(req)
-#     except URLError, e:
-#         if e.code == 401:
-#             # Unauthorized - bad token
-#             session.pop('access_token', None)
-#             return redirect(url_for('login'))
-#         return res.read()
-#
-#     match = re.search(r'[\w\.-]+@[\w\.-]+', res.read())
-#     user_info = match.group(0)
-#     return redirect('/landing')
-#
-#
-# @application.route('/login')
-# def login():
-#     callback = url_for('authorized', _external=True)
-#     return google.authorize(callback=callback)
-#
-#
-# @application.route('/logout')
-# def logout():
-#     global user_info
-#     user_info = ""
-#     session.pop('access_token')
-#     return redirect('/landing')
-#
-#
-# @application.route(REDIRECT_URI)
-# @google.authorized_handler
-# def authorized(resp):
-#     access_token = resp['access_token']
-#     session['access_token'] = access_token, ''
-#     return redirect(url_for('index'))
-#
-#
-# @google.tokengetter
-# def get_access_token():
-#     return session.get('access_token')
-
-
-# run the app.
-# DEBUG = True
-# application.debug = DEBUG
 
 if __name__ == "__main__":
-    # Setting debug to True enables debug output. This line should be
-    # removed before deploying a production app.
     application.run()

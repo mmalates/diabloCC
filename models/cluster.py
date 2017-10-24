@@ -25,8 +25,8 @@ sum(mask)
 df = df[mask]
 
 
-link_features = ['DOY', 'DOW', 'temp_high',
-                 'temp_low', 'hum_avg', 'wind_avg', 'prec']
+link_features = ['temp_high', 'temp_low', 'hum_avg',
+                 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg']
 
 X = df.drop(['date', 'rounds', 'walkers'], axis=1)
 x = X.values  # returns a numpy array

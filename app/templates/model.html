@@ -24,8 +24,8 @@
           <th>Dewpoint (F)</th>
           <th>Pressure (in hg)</th>
           <th>Predicted Rounds</th>
-
-       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, date_for_table, vis_avg, dew_avg, sea_avg, temp_high_sqrt, hum_avg_sqrt, prec_sqrt, year, month, rain, cum_prec, rain_db4, pred in tenday_fc %}
+          <th>Golf Index</th>
+       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, date_for_table, vis_avg, dew_avg, sea_avg, temp_high_sqrt, hum_avg_sqrt, prec_sqrt, year, month, rain, cum_prec, rain_db4, label, pred, golf_index in tenday_fc %}
         <tr>
           <td style="text-align: left">{{date_for_table}}</td>
           <td>{{temp_high}}</td>
@@ -37,6 +37,7 @@
           <td>{{dew_avg}}</td>
           <td>{{sea_avg}}</td>
           <td>{{pred}}</td>
+          <td>{{golf_index}}</td>
         {% endfor %}
       </table>
   </div>
