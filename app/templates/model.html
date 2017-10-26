@@ -3,16 +3,9 @@
 
 {% block content %}
 <html>
-<!-- <h1>Diablo Country Club <img src='https://www.diablocc.org/assets/diablocc/Media/web_logo_2015.png' style="float:right" width=100px height=100px></img></h1>
-<div>
-  <form action="/model/" method="post">
-    <button name="model" type="submit">Get Prediction</button>
-  </form>
-</div>
-<hr> -->
-<div>
-  <div>
-     <table style="width:90%;background-color:#f1f1c1;text-align:left;padding:15px;border: 1px solid black; border-collapse: collapse;">
+<div class="navbar">
+  <div style="overflow-x:auto; width:90%; position:center; margin-left:5%" >
+     <table>
         <tr>
           <th>Date</th>
           <th>Temp High (F)</th>
@@ -24,8 +17,11 @@
           <th>Dewpoint (F)</th>
           <th>Pressure (in hg)</th>
           <th>Predicted Rounds</th>
+          <th>Crowd Term</th>
+          <th>Weather Index</th>
+          <th>Weather Factor</th>
           <th>Golf Index</th>
-       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, date_for_table, vis_avg, dew_avg, sea_avg, temp_high_sqrt, hum_avg_sqrt, prec_sqrt, year, month, rain, cum_prec, rain_db4, label, pred, golf_index in tenday_fc %}
+       {% for date, temp_high, temp_low, humid, wind, prec, dow, doy, vis, dew, sea, date_for_table, vis_avg, dew_avg, sea_avg, temp_high_sqrt, hum_avg_sqrt, prec_sqrt, year, month, rain, cum_prec, rain_db4, label, weather_term, pred, crowd_term, golf_index in tenday_fc %}
         <tr>
           <td style="text-align: left">{{date_for_table}}</td>
           <td>{{temp_high}}</td>
@@ -37,6 +33,9 @@
           <td>{{dew_avg}}</td>
           <td>{{sea_avg}}</td>
           <td>{{pred}}</td>
+          <td>{{crowd_term}}</td>
+          <td>{{label}}</td>
+          <td>{{weather_term}}
           <td>{{golf_index}}</td>
         {% endfor %}
       </table>

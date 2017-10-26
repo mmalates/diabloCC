@@ -1,37 +1,35 @@
 from flask import Flask
-from flask import render_template, flash, redirect, url_for, session, jsonify
-from flask_oauth import OAuth
+from flask import render_template
 import requests
 import json
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from collections import defaultdict
-
+from sklearn import preprocessing
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import cophenet
+from scipy.spatial.distance import pdist
+from scipy.cluster.hierarchy import fcluster
 
 application = Flask(__name__)
 
-user_info = "staff"
-user_photo_url = 'https://demo.keypasco.com/res-1.2.2/img/User_ring.png'
+# user_info = "staff"
+# user_photo_url = 'https://demo.keypasco.com/res-1.2.2/img/User_ring.png'
 
 
 @application.route('/')
-@application.route('/landing')
 def landing():
-    global user_info, user_photo_url
-    if user_info is not "":
-        return render_template("landing.html",
-                               title='Landing',
-                               user=user_info,
-                               user_photo=user_photo_url,
-                               forecast_data={},
-                               tenday_fc=[],
-                               prediction=[])
-    else:
-        return render_template("landing.html",
-                               title='Landing',
-                               user_photo='https://demo.keypasco.com/res-1.2.2/img/User_ring.png',
-                               forecast_data={})
+    return render_template("base.html")
+
+
+# define features for clustering weather data
+cluster_features = ['temp_high', 'temp_low',
+                    'hum_avg', 'wind_avg', 'prec', 'vis_avg']
+
+# define features for modelling
+model_features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
+                  'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']
 
 
 @application.route('/model/', methods=['POST'])
@@ -123,10 +121,8 @@ def model():
     # remove mondays
     not_mondays = data.DOW != 0
     data = data[not_mondays]
-    # load training data
-    features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
-                'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']
 
+    # load training data
     def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
     df = pd.read_csv('data/train_clean.csv',
                      parse_dates=['date'], date_parser=dateparse)
@@ -161,50 +157,94 @@ def model():
     df['prec_sqrt'] = np.sqrt(df['prec'])
 
     # define features for model
-    features = ['year', 'month', 'DOW', 'DOY', 'temp_high', 'temp_low',
-                'hum_avg', 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg', 'temp_high_sqrt', 'rain', 'cum_prec', 'hum_avg_sqrt', 'prec_sqrt']
 
     # feature matrix
-    X = df[features]
-    # target variable
+    global model_features
+    X = df[model_features]
+    # define target variable
     y = df['rounds']
 
     # get cluster similarities
-    cluster_features = ['temp_high', 'temp_low', 'hum_avg',
-                        'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg']
-    clusterdf = pd.read_csv('data/5ward.csv', parse_dates=[
-        'date'], date_parser=dateparse)
+    global cluster_features
+    labels = []
+    for day in data[cluster_features].values:
+        labels.append(cluster_new_point(day, df))
+    index_dic = {5.0: 10.0,
+                 4.0: 6.0,
+                 3.0: 5.0,
+                 2.0: 8.0,
+                 1.0: 7.0}
+    data['labels'] = np.array(labels)
+    weather_term = []
+    for label in labels:
+        weather_term.append(index_dic[label])
+    data['weather_term'] = np.array(weather_term)
+    data['prediction'] = RF_model(X, y, data).astype(int)
+    data['crowd_term'] = (7.0) * (1.0 / (data['prediction']**(1. / 2.)))
+    data['golf_index'] = data['crowd_term'] * data['weather_term']
+    data['golf_index'] = data['golf_index'].round(2)
+    data['crowd_term'] = data['crowd_term'].round(2)
+    # create predictions columns
+    return render_template('model.html', tenday_fc=data.values)
 
+
+def cluster_new_point(vector, X):
+    '''Takes a forecast vector and return a cluster label'''
+    global cluster_features
+    vectordf = pd.DataFrame([vector], columns=cluster_features)
+    Xforecast = X[cluster_features]
+
+    # append the forecast vector to the dataframe
+    Xforecast = Xforecast.append(vectordf)
+    xf = Xforecast.values
+
+    # scale the DF for clustering
+    min_max_scaler = preprocessing.MinMaxScaler()
+    xf_scaled = min_max_scaler.fit_transform(xf)
+    Xforecast = pd.DataFrame(xf_scaled, columns=Xforecast.columns)
+
+    # cluster the DF
+    Z = linkage(Xforecast, "ward")
+    c, coph_dists = cophenet(Z, pdist(Xforecast))
+    labels = fcluster(Z, 5, criterion='maxclust')
+    label_s = pd.Series(labels)
+    Xforecast['label'] = label_s
+
+    # returns label for last point because the forecast data was appended
+    forecast_label = label_s[len(label_s) - 1]
+    forecast_means = Xforecast.groupby(by='label').mean()
+    forecast_label_mean = forecast_means[forecast_means.index ==
+                                         forecast_label].values
+
+    def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
+    clusterdf = pd.read_csv(
+        'data/5ward.csv', parse_dates=['date'], date_parser=dateparse)
+
+    # find the centroid of each cluster
     meanvect = clusterdf.groupby(by='label').mean()
     vectors = meanvect[cluster_features].values
     index = meanvect[cluster_features].index
 
-    dic = defaultdict()
-    for label, values in zip(index, vectors):
-        dic[label] = values
+    # dictionary for storing centroid vectors
+    dic = defaultdict(list)
+    for centroid, vector in zip(index, vectors):
+        dic[centroid] = vector
 
-    labels = []
-    for day in data[cluster_features].values:
-        diffs = defaultdict(float)
-        for label, vector in dic.iteritems():
-            diffs[label] = np.sum(np.abs(day - vector))
-        labels.append(min(diffs.items(), key=lambda x: x[1]))
-    label_col = []
-    index_dic = {5.0: 5.0, 4.0: 2.0, 3.0: 1.0, 2.0: 4.0, 1.0: 3.0}
-    for cluster_label in labels:
-        label_col.append(index_dic[cluster_label[0]])
-    data['labels'] = np.array(label_col)
-    data['prediction'] = RF_model(X, y, data).astype(int)
-
-    data['golf_index'] = (14.) * (1.0 / np.sqrt(data['prediction'])
-                                  ) * data['labels']
-    data['golf_index'] = data['golf_index'].round(2)
-    # create predictions columns
-    return render_template('model.html', title='Ten Day Forecast', tenday_fc=data.values, user=user_info, forecast_data={}, user_photo=user_photo_url, prediction=data.prediction.values)
+    scale = np.array([0.00505801,  0.00842202,  0.00908669,
+                      0.04073148,  0.13243243, 0.09606463])
+    diffs = defaultdict(float)
+    for label, vector in dic.iteritems():
+        # print (scale * day) - (scale * vector)
+        diffs[label] = np.sum(
+            np.abs(np.subtract(forecast_label_mean, scale * vector)))
+    tup = min(diffs.items(), key=lambda x: x[1])
+    return tup[0]
 
 
 def RF_model(X, y, forecast):
-    ''' fit and predict with a random forest model '''
+    """
+    fit a random forest model to array y with feature matrix X and return predicted y using forecast data
+    """
     rf = RandomForestRegressor(n_estimators=50, bootstrap=False,
                                max_depth=8, max_features=0.6, n_jobs=4)
     rf.fit(X, y)

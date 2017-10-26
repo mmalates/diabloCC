@@ -26,14 +26,10 @@ df = df[mask]
 
 
 link_features = ['temp_high', 'temp_low', 'hum_avg',
-                 'wind_avg', 'prec', 'vis_avg', 'sea_avg', 'dew_avg']
+                 'wind_avg', 'prec', 'vis_avg']
 
 X = df.drop(['date', 'rounds', 'walkers'], axis=1)
 x = X.values  # returns a numpy array
-min_max_scaler = preprocessing.MinMaxScaler()
-x_scaled = min_max_scaler.fit_transform(x)
-X = pd.DataFrame(x_scaled, columns=X.columns)
-X.head()
 
 
 # links = ['ward', 'single', 'centroid',
@@ -44,7 +40,6 @@ links = ['ward', 'complete', 'weighted']
 
 
 def try_linkages(linkage_type):
-    print linkage_type
     Z = linkage(X[link_features], linkage_type)
     c, coph_dists = cophenet(Z, pdist(X))
 
@@ -68,6 +63,7 @@ def try_linkages(linkage_type):
     plt.show()
 
     k = acceleration_rev.argmax() + 2
+    print " linkage: ", linkage_type
     print "clusters:", k
     for k in xrange(3):
         k += 3
@@ -106,5 +102,63 @@ def make_cluster_plots(k, linkage_type, Z):
     df.to_csv(str(k) + linkage_type + '.csv')
 
 
-for link in links:
-    try_linkages(link)
+# for link in links:
+#     try_linkages(link)
+vector = []
+xvect = X[link_features].values
+for val in xvect[0]:
+    vector.append(val)
+vector[0] += 1
+print vector
+
+forecast = [[90, 56, 38, 8, 0.0, 10.0, 30.1,  48.3]]
+vectordf = pd.DataFrame([vector], columns=link_features)
+Xforecast = X[link_features]
+Xforecast.info()
+Xforecast = Xforecast.append(vectordf)
+xf = Xforecast.values
+
+
+min_max_scaler = preprocessing.MinMaxScaler()
+xf_scaled = min_max_scaler.fit_transform(xf)
+x_scaled = min_max_scaler.fit_transform(x)
+Xforecast = pd.DataFrame(xf_scaled, columns=Xforecast.columns)
+X = pd.DataFrame(x_scaled, columns=X.columns)
+
+print xf[2]
+print xf_scaled[2]
+scaler1 = []
+scaler2 = []
+matrix = []
+for n in range(200):
+    scaler = []
+    for xfn, xfs in zip(xf[n], xf_scaled[n]):
+        scaler.append(xfs / xfn)
+    matrix.append(scaler)
+print matrix
+matdf = pd.DataFrame(matrix)
+matdf.info()
+matdf.head()
+matdf = matdf.fillna(0.0)
+matdf.describe().T['mean'].values
+
+for xfn, xfs in zip(xf[1], xf_scaled[1]):
+    scaler1.append(xfs / xfn)
+print scaler2
+for a, b in zip(scaler1, scaler2):
+    print a, b
+
+
+def cluster_new_point(Xforecast):
+    Z = linkage(Xforecast, "ward")
+    c, coph_dists = cophenet(Z, pdist(Xforecast))
+    labels = fcluster(Z, 5, criterion='maxclust')
+    label_s = pd.Series(labels)
+    # print label_s.groupby(label_s).count()
+    # print label_s[-10:]
+    return label_s[len(label_s) - 1]
+
+
+label_fore = cluster_new_point(Xforecast)
+label_old = cluster_new_point(X[link_features])
+print label_fore
