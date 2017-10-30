@@ -1,7 +1,6 @@
-## Golf Staff Predictor
+## Diablo Country Club Golfability Predictor
 Predicts golf rounds at Diablo Country Club based on weather forecast data to optimize staffing levels.
 
----
 
 ## Data:
 
@@ -16,6 +15,7 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * Day of Week (Integer): Monday : 0 , Sunday : 6
   * Day of Year (Integer)
   * Date (Timestamp): Index
+  * Notes (Text): Comments on weather and other aspects about the course that day
 
 
 #### From WeatherUnderground (Features):
@@ -39,11 +39,9 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
 ## Exploratory Data Analysis
   * Seasonal decomposition shows a strong seasonal effect on the target variable, rounds.
-  * A histogram of the residual rounds shows that it is normally distributed
   * I suggest that the trend in observed rounds could be explained by the amount of rainfall in those years.
-  * Plotting the residual of rounds on top of several weather features is an attempt to show motivation that significant changes in rounds can be explained and predicted by weather.  The follow plot shows dashed lines where the # of rounds deviates from the mean by more than 1.5 standard deviations.
 
-![High deviance rounds](plots/rounds_nznt_resid_and_all_resid.png "High Deviance Rounds")
+
 
   #### Future Exploration
   * plot rounds versus individual weather features to get a sense for their effects on rounds
@@ -56,56 +54,40 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * A baseline model the mean of rounds (~85) achieves a rmse of 38.5 rounds.
 
 ### 2. Seasonal
-  * By predicting the seasonally varying mean of the data we achieve a rmse of 35.2 rounds.
+  * By predicting the seasonally varying mean of the data we achieve a rmse of 35.2 rounds.  This suggests a moving standard deviation of 35 rounds on any given day.
 
-### 3. Decision Tree
+### 3. Decision Trees
   * Iteratively removed low importance features and obtained a final list of important features and their importance ratings:
-    - Temperature (high): 0.112
-    - Humidity (low): 0.096
-    - Day of week: 0.092
-    - Pressure: 0.087
-    - Dew Point (high): 0.087
-    - Temperature (low): 0.083
-    - Humidity (high): 0.076
-    - Precipitation: 0.076
-    - Wind (high): 0.076
-    - Pressure (low): 0.073
-    - Dew Point (low): 0.072
-    - Wind (low): 0.069
+    - DOW: 0.279
+    - \sqrt{Temperature High}: 0.184
+    - Temperature High: 0.17
+    - Day of Year: 0.087
+    - Precipitation: 0.058
+    - \sqrt{Precipitation}: 0.048
+    - Month: 0.040
+    - Year: 0.025
+    - \sqrt{Average Humidity}: 0.017
+    - Average Humidity: 0.015
+    - Sea Level Pressure High: 0.015
+    - Cummulative Precipitation: 0.014
+    - Temperature Low: 0.013
+    - Wind Speed High: 0.012
+    - Average Dewpoint: 0.01
+    - Visibility Low: 0.007
+    - Rain Boolean: 0.003
 
 
   * Grid search was performed for both random forest models and adaptive boosted tree models.
 
-  * Using the features listed above, a non-bootstrapped random forest model with 150 trees and max depth of 6 achieved an rmse of 29.8 rounds.
+  * Using the features listed above, a bootstrapped random forest model with 50 trees and max depth of 8 achieved a 10-fold cross-validated train rmse of 22.1 rounds.
 
-  * train error:  22.1021855379 Out of bag score:  0.637017586517 feature importances:  [('DOW', 0.27929834743807475), ('temp_high_sqrt', 0.18422417806903449), ('temp_high', 0.17086913250463148), ('DOY', 0.08712196094487272), ('prec', 0.058603686538502536), ('prec_sqrt', 0.048392720190598801), ('month', 0.040341973332049932), ('year', 0.024315176441284989), ('hum_avg_sqrt', 0.016613128639815435), ('hum_avg', 0.015412420478222184), ('sea_high', 0.015064338817978994), ('cum_prec', 0.014024961834060339), ('temp_low', 0.013625565742811617), ('wind_high', 0.012411478208566537), ('dew_avg', 0.0099848425764057554), ('vis_low', 0.0070452009046944883), ('rain', 0.0026508873383949152)]
-test RMSE:  25.1429375923
+  * The same model achieved a test RMSE of  25.1 rounds on unseen test data.
 
-### 4. ARIMA
-  * Fit an ARIMA model with (p,d,q) = (1,1,0) of difference stationarized history from the previous year.
-
-  * Stationarized data was also corrected for seasonal effects by subtracting the rolling average.
-
-  * The model uses the previous year for forecasting, differenced on the data 2 years prior.
-
-  * Using the previous 4 years for validation, the performs with a mean RMSE of 535 rounds.
-
-  * Forecasting to next year (2017-09 through 2018-08) the model predicts 22,221 rounds will be played.
-
-### Future Models
-  * ARIMAX
-
----
 
 ## Web Application:
 
 ### 1. UI/UX
-  * I plan to make a stylish and well-tested web application with a plethora of interactive and informative tools
-  * Staff members will sign-in to obtain a prediction of rounds played based on recent weather and the weather forecast for a specified # of days.
-  * Club members will sign-in to obtain a prediction of the "playability" of the course based on recent weather and the weather forecast.
+  * Anyone can visit the webpage at http://diabloCC-golfability.us-east-2.elasticbeanstalk.com/
+  * Users click the "Get Prediction" button to obtain a prediction of the crowd level for next 10 days.
+  * The applications applies a custom "golfability" formula with variables crowd level and weather conditions.
 
-### 2. Database
-  * Staff members will interact with database on S3 that can be updated and modified via the web application.  The database will be used to improve on the model over time.
-  * Weather forecast data with be requested in real time using the `pywapi` package and combined with a model that is updated on a semi-frequent schedule.
-
-A test version of the application currently exists at http://test-eb-dev.us-east-2.elasticbeanstalk.com/
