@@ -78,6 +78,9 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
   * Using the features listed above, a non-bootstrapped random forest model with 150 trees and max depth of 6 achieved an rmse of 29.8 rounds.
 
+  * train error:  22.1021855379 Out of bag score:  0.637017586517 feature importances:  [('DOW', 0.27929834743807475), ('temp_high_sqrt', 0.18422417806903449), ('temp_high', 0.17086913250463148), ('DOY', 0.08712196094487272), ('prec', 0.058603686538502536), ('prec_sqrt', 0.048392720190598801), ('month', 0.040341973332049932), ('year', 0.024315176441284989), ('hum_avg_sqrt', 0.016613128639815435), ('hum_avg', 0.015412420478222184), ('sea_high', 0.015064338817978994), ('cum_prec', 0.014024961834060339), ('temp_low', 0.013625565742811617), ('wind_high', 0.012411478208566537), ('dew_avg', 0.0099848425764057554), ('vis_low', 0.0070452009046944883), ('rain', 0.0026508873383949152)]
+test RMSE:  25.1429375923
+
 ### 4. ARIMA
   * Fit an ARIMA model with (p,d,q) = (1,1,0) of difference stationarized history from the previous year.
 

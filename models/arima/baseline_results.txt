@@ -1,0 +1,201 @@
+2013-09
+>Predicted=279.000, Expected=284
+>Predicted=230.000, Expected=287
+>Predicted=263.000, Expected=363
+>Predicted=174.000, Expected=252
+>Predicted=119.000, Expected=156
+>Predicted=198.000, Expected=147
+>Predicted=283.000, Expected=243
+>Predicted=305.000, Expected=225
+>Predicted=447.000, Expected=363
+>Predicted=274.000, Expected=286
+>Predicted=323.000, Expected=310
+>Predicted=415.000, Expected=326
+total rounds: 3310.0
+actual rounds: 3242.0
+Yearly error: 68.0
+RMSE: 62.328
+2014-09
+>Predicted=284.000, Expected=282
+>Predicted=287.000, Expected=202
+>Predicted=363.000, Expected=261
+>Predicted=252.000, Expected=170
+>Predicted=156.000, Expected=120
+>Predicted=147.000, Expected=197
+>Predicted=243.000, Expected=315
+>Predicted=225.000, Expected=248
+>Predicted=363.000, Expected=352
+>Predicted=286.000, Expected=285
+>Predicted=310.000, Expected=337
+>Predicted=326.000, Expected=337
+total rounds: 3242.0
+actual rounds: 3106.0
+Yearly error: 136.0
+RMSE: 53.881
+2015-09
+>Predicted=282.000, Expected=176
+>Predicted=202.000, Expected=328
+>Predicted=261.000, Expected=244
+>Predicted=170.000, Expected=214
+>Predicted=120.000, Expected= 95
+>Predicted=197.000, Expected=258
+>Predicted=315.000, Expected=167
+>Predicted=248.000, Expected=275
+>Predicted=352.000, Expected=259
+>Predicted=285.000, Expected=305
+>Predicted=337.000, Expected=291
+>Predicted=337.000, Expected=327
+total rounds: 3106.0
+actual rounds: 2939.0
+Yearly error: 167.0
+RMSE: 75.045
+CV RMSE: 63.7514864997
+Average Yearly Error: 123.666666667
+>Predicted=214.000
+>Predicted=175.000
+>Predicted=245.000
+>Predicted=190.000
+>Predicted=79.000
+>Predicted=151.000
+>Predicted=195.000
+>Predicted=283.000
+>Predicted=315.000
+>Predicted=263.000
+>Predicted=343.000
+>Predicted=368.000
+forecasted guest_rounds rounds: 2821.0
+----------------------------------------
+2013-09
+>Predicted=35.000, Expected= 22
+>Predicted=30.000, Expected= 27
+>Predicted=80.000, Expected= 45
+>Predicted=26.000, Expected= 36
+>Predicted=17.000, Expected= 30
+>Predicted=26.000, Expected= 15
+>Predicted=30.000, Expected= 37
+>Predicted=24.000, Expected= 20
+>Predicted=31.000, Expected= 37
+>Predicted=40.000, Expected= 38
+>Predicted=31.000, Expected= 32
+>Predicted=29.000, Expected= 37
+total rounds: 399.0
+actual rounds: 376.0
+Yearly error: 23.0
+RMSE: 12.790
+2014-09
+>Predicted=22.000, Expected= 14
+>Predicted=27.000, Expected= 40
+>Predicted=45.000, Expected= 34
+>Predicted=36.000, Expected= 24
+>Predicted=30.000, Expected= 20
+>Predicted=15.000, Expected= 14
+>Predicted=37.000, Expected= 29
+>Predicted=20.000, Expected= 18
+>Predicted=37.000, Expected= 22
+>Predicted=38.000, Expected= 31
+>Predicted=32.000, Expected= 19
+>Predicted=37.000, Expected= 22
+total rounds: 376.0
+actual rounds: 286.6
+Yearly error: 89.4
+RMSE: 10.580
+2015-09
+>Predicted=14.000, Expected= 12
+>Predicted=40.000, Expected= 32
+>Predicted=34.000, Expected= 47
+>Predicted=24.000, Expected= 24
+>Predicted=19.600, Expected= 10
+>Predicted=14.000, Expected= 28
+>Predicted=29.000, Expected= 20
+>Predicted=18.000, Expected= 27
+>Predicted=22.000, Expected= 34
+>Predicted=31.000, Expected= 24
+>Predicted=19.000, Expected= 31
+>Predicted=22.000, Expected= 29
+total rounds: 286.6
+actual rounds: 318.0
+Yearly error: 31.4
+RMSE: 9.457
+CV RMSE: 10.9421370641
+Average Yearly Error: 47.9333333333
+>Predicted=22.000
+>Predicted=17.000
+>Predicted=26.000
+>Predicted=37.000
+>Predicted=6.000
+>Predicted=6.000
+>Predicted=23.000
+>Predicted=36.000
+>Predicted=28.000
+>Predicted=32.000
+>Predicted=49.000
+>Predicted=40.000
+forecasted family_guest rounds: 322.0
+----------------------------------------
+2013-09
+>Predicted=1368.000, Expected=1810
+>Predicted=1016.000, Expected=1267
+>Predicted=911.000, Expected=949
+>Predicted=313.000, Expected=515
+>Predicted=417.000, Expected=501
+>Predicted=612.000, Expected=480
+>Predicted=971.000, Expected=940
+>Predicted=1414.000, Expected=1226
+>Predicted=1695.000, Expected=1312
+>Predicted=2377.000, Expected=2481
+>Predicted=1970.000, Expected=1785
+>Predicted=2331.000, Expected=2439
+total rounds: 15395.0
+actual rounds: 15705.0
+Yearly error: 310.0
+RMSE: 216.947
+2014-09
+>Predicted=1810.000, Expected=1490
+>Predicted=1267.000, Expected=1135
+>Predicted=949.000, Expected=686
+>Predicted=515.000, Expected=300
+>Predicted=501.000, Expected=384
+>Predicted=480.000, Expected=668
+>Predicted=940.000, Expected=1119
+>Predicted=1226.000, Expected=1447
+>Predicted=1312.000, Expected=1578
+>Predicted=2481.000, Expected=2122
+>Predicted=1785.000, Expected=1717
+>Predicted=2439.000, Expected=1560
+total rounds: 15705.0
+actual rounds: 14206.4
+Yearly error: 1498.6
+RMSE: 334.408
+2015-09
+>Predicted=1490.000, Expected=1949
+>Predicted=1135.000, Expected=1276
+>Predicted=686.000, Expected=792
+>Predicted=300.000, Expected=363
+>Predicted=384.400, Expected=267
+>Predicted=668.000, Expected=742
+>Predicted=1119.000, Expected=746
+>Predicted=1447.000, Expected=1364
+>Predicted=1578.000, Expected=1634
+>Predicted=2122.000, Expected=2037
+>Predicted=1717.000, Expected=1616
+>Predicted=1560.000, Expected=1592
+total rounds: 14206.4
+actual rounds: 14378.0
+Yearly error: 171.6
+RMSE: 189.875
+CV RMSE: 247.076511606
+Average Yearly Error: 660.066666667
+>Predicted=1212.000
+>Predicted=975.000
+>Predicted=706.000
+>Predicted=449.000
+>Predicted=202.000
+>Predicted=186.000
+>Predicted=729.000
+>Predicted=893.000
+>Predicted=1526.000
+>Predicted=1704.000
+>Predicted=1662.000
+>Predicted=1309.000
+forecasted club_cars rounds: 11553.0
+----------------------------------------

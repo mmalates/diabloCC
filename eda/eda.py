@@ -11,7 +11,8 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
 
 
-data = pd.read_csv('diablo.csv', parse_dates=['date'], date_parser=dateparse)
+data = pd.read_csv('../data/data_cum_clean.csv', parse_dates=[
+                   'date'], date_parser=dateparse)
 
 
 # make autocorrelation plot
@@ -21,10 +22,12 @@ data = pd.read_csv('diablo.csv', parse_dates=['date'], date_parser=dateparse)
 
 # make seasonal decomposition
 def decompose(series, filename):
-    decomposition = seasonal_decompose(series, model='additive', freq=260)
-    fig, ax = plt.subplots(figsize=(20, 20))
-    fig = decomposition.plot()
-    plt.savefig(filename + '_decomposition')
+    decomposition = seasonal_decompose(series, model='additive', freq=365)
+    fig, ax = plt.subplots(figsize=(20, 5))
+    ax = decomposition.trend.plot()
+    ax.set_ylabel('Trend')
+    plt.savefig('plots/' + filename + '_decomposition')
+    plt.show()
 
 
 # get rounds as series with date as index
@@ -53,10 +56,22 @@ thursday = datetime_series(thursday)
 friday = datetime_series(friday)
 
 
-decompose(all, 'all')
-decompose(weekend, 'weekend')
-decompose(weekday, 'weekday')
-decompose(tuesday, 'tuesday')
-decompose(wednesday, 'wednesday')
-decompose(thursday, 'thursday')
-decompose(friday, 'friday')
+all.index
+allf = all[~all.index.duplicated(keep='first')]
+allf = allf.asfreq('D')
+out = []
+for i, item in enumerate(allf.values):
+    if np.isnan(item):
+        out.append(allf.iloc[i - 2])
+    else:
+        out.append(item)
+avg = np.mean(pd.Series(np.array(out)).dropna())
+filled = pd.Series(np.array(out), index=allf.index).fillna(avg)
+
+decompose(filled, 'filled')
+# decompose(weekend, 'weekend')
+# decompose(weekday, 'weekday')
+# decompose(tuesday, 'tuesday')
+# decompose(wednesday, 'wednesday')
+# decompose(thursday, 'thursday')
+# decompose(friday, 'friday')
