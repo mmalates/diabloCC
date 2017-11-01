@@ -15,10 +15,21 @@ def decompose(series, filename):
         Saves figure to filename
     '''
     decomposition = seasonal_decompose(series, model='additive', freq=365)
-    fig, ax = plt.subplots(figsize=(20, 5))
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plt.tick_params(labelsize=15)
     ax = decomposition.trend.plot()
-    ax.set_ylabel('Trend')
+    ax.set_xlabel('Date', size=30)
+    ax.set_ylabel('Trend', size=30)
+    ax.set_ylim([0, 100])
     plt.savefig(filename)
+    plt.show()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    plt.tick_params(labelsize=15)
+    ax = decomposition.observed.plot()
+    ax.set_xlabel('Date', size=30)
+    ax.set_ylabel('Observed', size=30)
+    ax.set_ylim([0, 200])
+    plt.savefig('observed.png')
     plt.show()
 
 

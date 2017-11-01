@@ -1,6 +1,7 @@
 ## Diablo Country Club Golfability Predictor
-Predicts golf rounds at Diablo Country Club based on weather forecast data to optimize staffing levels.
+Predicts golf rounds at Diablo Country Club based on weather forecast data and measures golfability.
 
+---
 
 ## Data:
 
@@ -8,7 +9,7 @@ Predicts golf rounds at Diablo Country Club based on weather forecast data to op
 The data is a combination of course data obtained from Diablo Country Club (DCC) located in Danville, CA and weather data scraped from WeatherUnderground collected by the Livermore Municiple Airport.  The data span nearly 6 years from November 2011 through August 2017.
 
 ### 2. Details
-#### From Diablo:
+#### From Diablo (Target):
   * Rounds (Integer): Target variable - total # of golf rounds played on a given date
   * Tournament rounds (Integer): total # of rounds played by tournament players (tournament players never walk)
   * Walkers (Integer): Total # of rounds played by walking players
@@ -18,7 +19,7 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * Notes (Text): Comments on weather and other aspects about the course that day
 
 
-#### From WeatherUnderground (Features):
+#### From WeatherUnderground (Feature matrix):
   * Temerature low, high, average (Fehrenheit) (Integer)
   * Wind speed low, high, average (Mph) (Integer)
   * Humidity low, high, average (%) (Integer)
@@ -32,19 +33,14 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * Days on which the course was closed were removed.
   * Days which only included tournament rounds were removed because the staffing level of the course follows a different guideline than non-tournament days.
   * Days on which precipitation was recorded as "T" (trace) were converted to 0.001 inches which is 10% of the smallest recorded precipitation.  This value was chosen arbitrarily.
-  #### Future Engineering
-    * Compute cumulative rainfall in past x # of days to simulate lag or persistence for decision tree models
+  * Computed cumulative rainfall from the day before to simulate lag or persistence for decision tree models
 
 ---
 
 ## Exploratory Data Analysis
   * Seasonal decomposition shows a strong seasonal effect on the target variable, rounds.
-  * I suggest that the trend in observed rounds could be explained by the amount of rainfall in those years.
-
-
-
-  #### Future Exploration
-  * plot rounds versus individual weather features to get a sense for their effects on rounds
+  * The course director suggested that the trend in observed rounds could be explained by the amount of rainfall in recent years.
+  * plotted scatter of weather features and target to get a sense of interactions and weather effects of rounds.
 
 ---
 
@@ -83,6 +79,7 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
   * The same model achieved a test RMSE of  25.1 rounds on unseen test data.
 
+---
 
 ## Web Application:
 
