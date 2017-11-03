@@ -6,7 +6,7 @@ Predicts golf rounds at Diablo Country Club based on weather forecast data and m
 ## Data:
 
 ### 1. Overview
-The data is a combination of course data obtained from Diablo Country Club (DCC) located in Danville, CA and weather data scraped from WeatherUnderground collected by the Livermore Municiple Airport.  The data span nearly 6 years from November 2011 through August 2017.
+The data is a combination of course data obtained from Diablo Country Club located in Danville, CA and weather data scraped from WeatherUnderground collected by the Livermore Municiple Airport.  The data span nearly 6 years from November 2011 through August 2017.
 
 ### 2. Details
 #### From Diablo (Target):
