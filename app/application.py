@@ -134,7 +134,7 @@ def model():
     predictions = rf.predict(data[model_features])
     # create predictions columns
     data['prediction'] = predictions.astype(int)
-    data['crowd_term'] = (1.0) * (1.0 / (data['prediction']**(1. / 2.)))
+    data['crowd_term'] = (1.0 / (data['prediction']**(1. / 2.)))
     golfability = np.zeros(len(data.prediction))
     for i, crowd in enumerate(data.prediction.values):
         if crowd >= 30:

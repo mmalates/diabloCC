@@ -11,6 +11,9 @@ import pickle
 def dateparse(x): return pd.datetime.strptime(x, '%Y-%m-%d')
 
 
+data = pd.read_csv('../data/data_cum_clean.csv',
+                   parse_dates=['date'], date_parser=dateparse)
+
 # load training data
 df = pd.read_csv('../data/train_cum_clean.csv',
                  parse_dates=['date'], date_parser=dateparse)
@@ -28,6 +31,9 @@ df_test = pd.read_csv('../data/test_cum_clean.csv',
 
 X_test_set = df_test[features]
 y_test_set = df_test['rounds']
+
+X_all = data[features]
+y_all = data['rounds']
 
 
 def RF_model_train_performance():
@@ -75,6 +81,25 @@ def RF_model_test_performance():
     print 'test RMSE: ', test_rmse
 
 
+def RF_pickle_model():
+    """
+    Trains and pickles a RF model
+    """
+    max_dep = 8
+    estimators = 100
+    bootstrap = True
+    max_feat = 0.6
+    max_leaf = 8
+    rf = RandomForestRegressor(n_estimators=estimators, bootstrap=bootstrap, criterion='mae', oob_score=True,
+                               min_samples_leaf=max_leaf,
+                               max_depth=max_dep, max_features=max_feat)
+    global X_all, y_all
+    rf.fit(X_all, y_all)
+    with open('rf.pkl', 'wb') as pkl:
+        pickle.dump(rf, pkl)
+
+
 if __name__ == '__main__':
-    RF_model_train_performance()
-    RF_model_test_performance()
+    # RF_model_train_performance()
+    # RF_model_test_performance()
+    RF_pickle_model()

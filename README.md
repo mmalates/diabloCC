@@ -1,7 +1,7 @@
 ## Diablo Country Club Golfability Predictor
 Predicts golf rounds at Diablo Country Club based on weather forecast data and measures golfability.
 
----
+
 
 ## Data:
 
@@ -35,14 +35,14 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
   * Days on which precipitation was recorded as "T" (trace) were converted to 0.001 inches which is 10% of the smallest recorded precipitation.  This value was chosen arbitrarily.
   * Computed cumulative rainfall from the day before to simulate lag or persistence for decision tree models
 
----
+
 
 ## Exploratory Data Analysis
   * Seasonal decomposition shows a strong seasonal effect on the target variable, rounds.
   * The course director suggested that the trend in observed rounds could be explained by the amount of rainfall in recent years.
   * plotted scatter of weather features and target to get a sense of interactions and weather effects of rounds.
 
----
+
 
 ## Modeling:
 
@@ -79,7 +79,7 @@ The data is a combination of course data obtained from Diablo Country Club (DCC)
 
   * The same model achieved a test RMSE of  25.1 rounds on unseen test data.
 
----
+
 
 ## Web Application:
 
