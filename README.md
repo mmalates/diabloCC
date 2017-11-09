@@ -1,6 +1,8 @@
 ## Diablo Country Club Golfability Predictor
 Predicts golf rounds at Diablo Country Club based on weather forecast data and measures golfability.
 
+Web Application URL: http://diabloCC-golfability.us-east-2.elasticbeanstalk.com/
+
 
 
 ## Data:
