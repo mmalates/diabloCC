@@ -1,9 +1,19 @@
-## Diablo Country Club Golfability Predictor
+# Diablo Country Club Golfability Predictor
 Predicts golf rounds at Diablo Country Club based on weather forecast data and measures golfability.
 
 Web Application URL: http://diabloCC-golfability.us-east-2.elasticbeanstalk.com/
 
+## Introduction:
+I aimed to answer the question "Will the golf course be crowded tomorrow?".  I partnered with Diablo Country Club and was given 6 years of daily course data to work with.  I used the number of rounds played on a given day as an indicator for crowds.  I combined the data with historical weather data that I scraped from WeatherUnderground to improve the predictive power of my model.  The motivation was that I could build a web application to fetch the 10-day weather forecast and use that to predict crowds in the future.  The application is deployed on AWS and used by members to plan their golfing schedule for maximum enjoyment.  The application is also used by the course director to target to crowd days and for promotional offerings.
 
+Observed crowds for the 6 year data set.
+
+ <img src="eda/observed.png" alt="observed" width=70%>
+
+
+Trend component of the seasonally decomposed rounds.
+
+ <img src="eda/trend.png" alt="trend" width=70%>
 
 ## Data:
 
