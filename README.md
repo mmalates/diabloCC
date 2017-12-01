@@ -3,6 +3,9 @@ Predicts golf rounds at Diablo Country Club based on weather forecast data and m
 
 Web Application URL: http://diabloCC-golfability.us-east-2.elasticbeanstalk.com/
 
+Capstone Presentation:
+```diabloCC-presentation.pdf```
+
 ## Introduction:
 I aimed to answer the question "Will the golf course be crowded tomorrow?".  I partnered with Diablo Country Club and was given 6 years of daily course data to work with.  I used the number of rounds played on a given day as an indicator for crowds shown in the in the "observed" figure below.  I combined the data with historical weather data that I scraped from WeatherUnderground to improve the predictive power of my model.  The motivation was that I could build a web application to fetch the 10-day weather forecast and use that to predict crowds in the future.  The application is deployed on AWS and used by members to plan their golfing schedule for maximum enjoyment.  The attendance at the course is declining as shown in the "trend" figure below.  The application can also be used by the course director to target to low crowd days for promotional offerings.
 
@@ -91,7 +94,9 @@ The data is a combination of course data obtained from Diablo Country Club locat
 
   * The same model achieved a test RMSE of  25.1 rounds on unseen test data.
 
+Model performances
 
+<img src="performance.png" alt="model performances" width=70%>
 
 ## Web Application:
 
