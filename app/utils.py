@@ -25,6 +25,12 @@ class Predictor(object):
         self.perfect_weather = np.array([71.1, 46.3, 58.5, 6.3, 10])
 
     def get_forecast(self):
+        '''
+        Fetches the the 10 day weather forecast.  Calculates the mean value for each day from the 240 hour forecast.
+
+        Returns:
+            DataFrame of 10-day forecast data
+        '''
         url240 = 'https://api.weather.com/v1/geocode/37.82616/-121.980217/forecast/hourly/240hour.json?apiKey=6532d6454b8aa370768e63d6ba5a832e&units=e'
 
         response240 = requests.get(url240)
@@ -85,6 +91,12 @@ class Predictor(object):
         return data
 
     def processing(self, data):
+        '''
+        Engineers features
+
+        Returns:
+            Dataframe of processed forecast data
+        '''
         # feature engineering
         data['vis_avg'] = data['vis'].round(1)
         data['dew_avg'] = data['dewpt'].round(1)
@@ -119,6 +131,9 @@ class Predictor(object):
         return data
 
     def get_predictions(self, data):
+        '''
+        Calculates predicitons and golfability based on processed forecast data and renders the results to the web page.
+        '''
         predictions = self.rf.predict(data[self.model_features])
         # create predictions columns
         data['prediction'] = predictions.astype(int)
