@@ -67,14 +67,14 @@ The data is a combination of course data obtained from Diablo Country Club locat
 ### 3. Decision Trees
   * Iteratively removed low importance features and obtained a final list of important features and their importance ratings:
     - DOW: 0.279
-    - \sqrt{Temperature High}: 0.184
+    - $\sqrt{Temperature High}$: 0.184
     - Temperature High: 0.17
     - Day of Year: 0.087
     - Precipitation: 0.058
-    - \sqrt{Precipitation}: 0.048
+    - $\sqrt{Precipitation}$: 0.048
     - Month: 0.040
     - Year: 0.025
-    - \sqrt{Average Humidity}: 0.017
+    - $\sqrt{Average Humidity}$: 0.017
     - Average Humidity: 0.015
     - Sea Level Pressure High: 0.015
     - Cummulative Precipitation: 0.014
